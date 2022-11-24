@@ -26,10 +26,10 @@ build/%.o: %.c %.h
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 calc.tab.c calc.tab.h: calc.y
-	$(BISON) -d $^
+	$(BISON) -Wcounterexamples -Dparse.trace -d $^
 
 lex.yy.c:	calc.l calc.tab.h
-	$(FLEX) $<
+	$(FLEX) -d $<
 
 .PHONY: clean
 
