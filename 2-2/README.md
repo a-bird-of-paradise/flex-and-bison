@@ -25,6 +25,7 @@ WS      ([[:space:]]{-}[\n])+
 so that a `WORD` is 'any string of non white space characters', and `WS` is 'almost whitespace' i.e. 
 newline characters are excluded. Then you can have a lot of rules like 
 ````flex
+%%
 {WS}+                                         {               chars += yyleng;          }
 {WORD}{WS}?                                   {   words += 1; chars += yyleng;          }
 {WORD}{WS}?\n                                 {   words += 1; chars += yyleng; lines++; }
@@ -39,6 +40,7 @@ more than 25 words, and then handled solitary
 newlines specially. Finally a catchall non word
 non newline rule to increment characters.
 ````flex
+%%
 {WORD}({WS}{WORD}){24}{WS}?\n                 {   words +=25; chars += yyleng; lines++; }
 {WORD}({WS}{WORD}){24}{WS}?                   {   words +=25; chars += yyleng;          }
 \n+                                           {   chars += yyleng; lines+= yyleng;      }
@@ -59,7 +61,7 @@ $ time wc ../pg145.txt ../pg1259.txt ../pg2641.txt
 
 real	0m0.034s
 user	0m0.017s
-sys	    0m0.008s
+sys     0m0.008s
 ````
 versus
 ````
@@ -71,5 +73,5 @@ $ time ./flex-wc ../pg145.txt ../pg1259.txt ../pg2641.txt
 
 real	0m0.019s
 user	0m0.014s
-sys	    0m0.003s
+sys     0m0.003s
 ````
