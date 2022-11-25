@@ -1,0 +1,5 @@
+flex-wc
+lex.yy.c
+lex.yy.h
+calc.tab.c
+calc.tab.h
