@@ -4,7 +4,7 @@ The naïve wordcounter shown in the book systematically counts the following:
 * One newline at a time
 * One arbitrary character at a time
 
-I improved it a little. First ones were to use the FLex speed options so it went a lot faster. 
+I improved it a little. First ones were to use the Flex speed options so it went a lot faster. 
 Building it with full optimisations helped as well.
 
 Main change though was to the structure of the lexer. There are two things you want the lexer to do
@@ -75,3 +75,4 @@ real	0m0.019s
 user	0m0.014s
 sys     0m0.003s
 ````
+If I was actually doing this for a production app I'd probably allow for up to 256 words using some codegen. I will come back to this and make a histo of words per line in these PG files I downloaded. 
