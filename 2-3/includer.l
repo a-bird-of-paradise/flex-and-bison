@@ -22,3 +22,4 @@
 ^\n {   fprintf(yyout, "%4d %s", yylineno-1, yytext);   }
 \n  {   ECHO;   }
 .   {   ECHO;   }
+^[^#\n].*   {   fprintf(yyout, "%4d %s", yylineno, yytext);     }
