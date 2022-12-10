@@ -4,7 +4,6 @@ extern struct bufstack *curbs;
 extern char* curfilename;
 
 int newfile(char* fn){
-    printf("||| %s\n",fn);
     FILE* f = fopen(fn, "r");
     if(!f) { perror(fn); return 0;  }
 
@@ -33,7 +32,6 @@ int popfile(void){
     struct bufstack* prevbs;
 
     if(!bs) return 0;
-    printf("--- %s\n",bs->filename);
 
     fclose(bs->f);
     free(bs->filename);
@@ -44,7 +42,9 @@ int popfile(void){
 
     if(!prevbs) { 
     /* bug in book: if we are here then we have just free'd the last element of the stack,
-        so need to clean up globals too */
+        so need to clean up globals too, by which I mean set this pointer to NULL,
+        otherwise the next newfile will pick up free()d memory as the prev entry. In other
+        words, a use after free will happen. */
         curbs = 0;
         return 0;
     }

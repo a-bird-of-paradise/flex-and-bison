@@ -2,20 +2,22 @@
 #include "bufstack.h"
 #include "symbol.h"
 
-struct symbol symtab[NHASH];
+struct symbol_table symtab;
+
 char* curfilename = 0;
 struct bufstack *curbs = 0;
 
 int main(int argc, char** argv)
 {
-    int i;
+
+    init_table(&symtab, 9997);
 
     if(argc < 2)    {
         fprintf(stderr, "need filename\n");
         return 1;
     }
 
-    for(i = 1; i < argc; i++) 
+    for(int i = 1; i < argc; i++) 
         if(newfile(argv[i]))
             yylex();
 

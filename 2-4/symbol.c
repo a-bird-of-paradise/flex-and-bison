@@ -4,6 +4,18 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+void init_table(struct symbol_table *stab, const unsigned long size)
+{
+    stab->size = size;
+    stab->table = malloc(size * sizeof(struct symbol));
+
+    for(unsigned long i = 0; i < size; i++)
+    {
+        stab->table[i].name = NULL;
+        stab->table[i].reflist = NULL;
+    }
+}
+
 static unsigned symhash(char* sym)
 {
     unsigned int hash = 0;
@@ -16,24 +28,54 @@ static unsigned symhash(char* sym)
 
 struct symbol* lookup(char* sym)
 {
-    struct symbol* sp = &symtab[symhash(sym) % NHASH];
+    long long tab_size = symtab.size;
 
-    int scount = NHASH; 
+    struct symbol* sp = &symtab.table[symhash(sym) % tab_size];
 
-    while(--scount >= 0) {
+    while(--tab_size >= 0) {
         if(sp->name && !strcasecmp(sp->name, sym)) return sp;
 
         if(!sp->name) {
             sp->name = strdup(sym);
-            sp->reflist = 0;
+            sp->reflist = NULL;
             return sp;
         }
 
-        if(++sp >= symtab+NHASH) sp = symtab;
+        if(++sp >= symtab.table+symtab.size) sp = symtab.table;    
     }
 
-    fputs("Symbol table overflow!\n", stderr);
-    abort();
+    // table is full, so make a new one that is doubled in size and free the old one
+
+    struct symbol *old_table = symtab.table, *old_it, *new_sp;
+    unsigned long old_size = symtab.size, new_size;
+    unsigned new_hash;
+
+    init_table(&symtab,old_size*2);
+
+    for(old_it = old_table; old_it < old_table + old_size; old_it++)
+    {
+        if(!old_it->name) continue;
+
+        new_size = 2 * old_size;
+        new_hash = symhash(old_it->name) % new_size;
+        new_sp = &symtab.table[new_hash];
+
+        while(--new_size)
+        {
+            if(!new_sp->name)
+            {
+                new_sp->name = old_it->name;
+                new_sp->reflist = old_it->reflist;
+                break;
+            }
+            // go back to the beginning if needed to find a blank
+            if(++new_sp >= symtab.table + 2 * old_size) new_sp = symtab.table;
+        }
+    }
+
+    free(old_table);
+
+    return lookup(sym);
 }
 
 void addref(int lineno, char* filename, char* word, int flags)
@@ -78,7 +120,7 @@ void freerefs(void)
     struct symbol* sp;
     struct ref* rp, *rpn;
 
-    for(sp = symtab; sp < symtab + NHASH; sp++){
+    for(sp = symtab.table; sp < symtab.table + symtab.size; sp++){
         rp = sp->reflist;
         while(rp) {
             rpn = rp->next;
@@ -93,9 +135,9 @@ void printrefs(void)
 {
     struct symbol* sp;
 
-    qsort(symtab, NHASH, sizeof(struct symbol), symcompare);
+    qsort(symtab.table, symtab.size, sizeof(struct symbol), symcompare);
 
-    for(sp = symtab; sp->name && sp < symtab + NHASH; sp++){
+    for(sp = symtab.table; sp->name && sp < symtab.table+ symtab.size; sp++){
         char* prevfn = NULL;
 
         struct ref* rp = sp->reflist;

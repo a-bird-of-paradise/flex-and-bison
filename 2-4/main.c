@@ -1,13 +1,15 @@
 #include "lex.yy.h"
 #include "symbol.h"
 
-struct symbol symtab[NHASH];
+struct symbol_table symtab;
 
 char* curfilename;
 
 int main(int argc, char** argv)
 {
     int i;
+
+    init_table(&symtab,9997);
 
     if(argc < 2) {
         curfilename = "(stdin)";

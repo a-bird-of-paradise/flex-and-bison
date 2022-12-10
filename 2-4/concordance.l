@@ -23,7 +23,10 @@ or |
 that |
 the |
 this |
-to  {   }
+to |
+you |
+was |
+your {   }
 
 [a-z]+(\'(s|t))?    {   addref(yylineno, curfilename, yytext, 0);   }
 .|\n    {   }
