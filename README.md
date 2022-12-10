@@ -36,5 +36,15 @@ Could also have used trailing context to ignore the newline and let the usual ne
 
 2. I had actually done this already!
 
-3. Oh boy. I'll have to look up hash table theory first...
+3. So I now know what a hash table is and how they cope with overflows. There are two ways: you either change the table so that the table elements are pointers to entries with `next` members, or you grow the table when it runs out of space. 
+
+    The chain approach is nicer and you can do things like track the tail as well as the head so inserts are quick. But lookups can get very slow if there are lots of collisions. One optimisation is to move the looked up object to the head every time so more common entries float to the top. 
+
+    Regrowing the table seems like cheating but it does mean you still have exactly one thing in each table entry. 
+
+    In this case we want to print out a sorted list of table entries at the end. This is a huge mess with the chain as we have to flatten the list of lists into one before sorting. But with an autogrowing hash table we just call `qsort` as always. 
+
+    So you can either periodically double the hash table, or you can walk a chain more often and have to merge it at the end. So the growing table wins here.
+
+
 
