@@ -1,9 +1,9 @@
 %option noyywrap nodefault yylineno 8bit
 %option header-file="lex.yy.h"
 %option outfile="lex.yy.c"
+%option interactive
 
 %{
-#include "calc.h"
 #include "calculator.tab.h"
 %}
 
@@ -20,14 +20,14 @@ EXP [Ee][-+]?[0-9]+
 "," |
 ";" |
 "(" |
-")" {   return  *yytext;    }
+")" {   return  *yytext;                }
 
-"<"     {yylval.fn=1; return CMP;}
-">"     {yylval.fn=2; return CMP;}
-"<>"    {yylval.fn=3; return CMP;}
-"=="    {yylval.fn=4; return CMP;}
-"<="    {yylval.fn=5; return CMP;}
-">="    {yylval.fn=6; return CMP;}
+"<"     {   yylval.fn=1; return CMP;    }
+">"     {   yylval.fn=2; return CMP;    }
+"<>"    {   yylval.fn=3; return CMP;    }
+"=="    {   yylval.fn=4; return CMP;    }
+"<="    {   yylval.fn=5; return CMP;    }
+">="    {   yylval.fn=6; return CMP;    }
 
 if      {   return IF;      }
 then    {   return THEN;    }
@@ -47,7 +47,7 @@ print   {   yylval.fn = B_print;return FUNC;    }
 "."?[0-9]+{EXP}?        {   yylval.d = atof(yytext);    return NUMBER;  }
 
 "//".*
-[ \t]
+[ \t]+
 
 \\\n    {   printf("c> ");  }
 \n      {   return EOL;     }

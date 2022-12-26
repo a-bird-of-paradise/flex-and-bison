@@ -151,6 +151,6 @@ void symlistfree(SYMLIST *sl)
     while(sl) {
         nsl = sl->next;
         free(sl);
-        sl=sl->next;
+        sl = nsl;
     }
 }

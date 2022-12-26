@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "calc.h"
 #include "ast.h"
 #include "eval.h"
+
+extern int yylineno;
+int yylex();
 }
 
 %code provides { void yyerror(const char *s, ...); }
@@ -79,7 +81,7 @@ calclist:   %empty
     }
     |   calclist LET NAME '(' symlist ')' '=' list EOL {
             dodef($3,$5,$8); 
-            printf("Defined %s\n",$3->name);
+            printf("Defined %s\n> ",$3->name);
     }
     |   calclist error EOL  {
             yyerrok; printf("> ");

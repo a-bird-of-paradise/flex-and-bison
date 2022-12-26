@@ -26,7 +26,7 @@ build/%.o: %.c %.h
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 calculator.tab.c calculator.tab.h: calculator.y
-	$(BISON) -Wcounterexamples -Dparse.trace -d $^
+	$(BISON) -Wcounterexamples -d $^
 
 lex.yy.c lex.yy.h:	calc.l	calculator.tab.h
 	$(FLEX) $<
