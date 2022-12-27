@@ -12,7 +12,9 @@ static double callbultin(FNCALL *fn)
         case B_exp:     return exp(v);  
         case B_sqrt:    return sqrt(v); 
         case B_log:     return log(v);  
-        case B_print:   printf("= %4.4g\n", v); return v;
+        case B_print:   treeprint(fn->l); return v; // will be printed
+        case B_debug:   if(v!=0) yydebug=1; else yydebug=0; return v;
+        case B_quit:    exit(v);
         default:    yyerror("Unknown internal function %d\n",fn->func);
                     return 0.0;
     }
@@ -85,8 +87,126 @@ static double calluser(UFNCALL *f)
     free(oldval);
 
     return v;
-    
+}
 
+void treeprint_inner(AST const * const a, const int l)
+{
+    int i = l;
+    while(i-->0) printf("|");
+
+    switch(a->nodetype) {
+
+        case N_NUMBER:  
+            printf("[%p] NUMBER %f\n", a, ((NUMVAL *)a)->number); 
+            break;
+
+        case N_SYMREF:  
+            printf("[%p] SYMREF %s\n",a,((SYMREF *)a)->s->name); 
+            if(((SYMREF *)a)->s->func) treeprint_inner(((SYMREF *)a)->s->func,l+1);
+            break;
+
+        case N_ASSIGNMENT:  
+            printf("[%p] ASSIGNMENT %s\n",a,((SYMASGN *)a)->s->name);
+            treeprint_inner(((SYMASGN *)a)->v, l+1);
+            break;
+
+        case N_PLUS:    
+            printf("[%p] OPERATOR +\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_MINUS:     
+            printf("[%p] OPERATOR -\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_MUL:      
+            printf("[%p] OPERATOR *\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_DIV:       
+            printf("[%p] OPERATOR /\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_ABS:       
+            printf("[%p] UNARY OPERATOR |\n",a);
+            treeprint_inner(a->l,l+1);
+            break;
+        case N_UMINUS:    
+            printf("[%p] UNARY OPERATOR -\n",a);
+            treeprint_inner(a->l,l+1);
+            break;
+
+        case N_GT:         
+            printf("[%p] OPERATOR >\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_LT:         
+            printf("[%p] OPERATOR <\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_NEQ:        
+            printf("[%p] OPERATOR <>\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_EQ:         
+            printf("[%p] OPERATOR ==\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_GEQ:        
+            printf("[%p] OPERATOR >=\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+        case N_LEQ:        
+            printf("[%p] OPERATOR <=\n",a);
+            treeprint_inner(a->l,l+1);
+            treeprint_inner(a->r,l+1);
+            break;
+
+        case N_IF:  
+            printf("[%p] IF\n",a);
+            if(((FLOW *)a)->cond) treeprint_inner(((FLOW *)a)->cond,l+1);
+            if(((FLOW *)a)->tl) treeprint_inner(((FLOW *)a)->tl,l+1);
+            if(((FLOW *)a)->el) treeprint_inner(((FLOW *)a)->el,l+1);
+            break;
+
+        case N_WHILE:
+            printf("[%p] WHILE\n",a);
+            if(((FLOW *)a)->cond) treeprint_inner(((FLOW *)a)->cond,l+1);
+            if(((FLOW *)a)->tl) treeprint_inner(((FLOW *)a)->tl,l+1);
+            break;
+
+        case N_LIST:
+            printf("[%p] LIST\n", a);
+            if(a->l) treeprint_inner(a->l,l+1);
+            if(a->r) treeprint_inner(a->r,l+1); 
+            break;
+
+        case N_BUILTIN_FUNCCALL: 
+            printf("[%p] BUILT IN FUNCTION %d\n",a, ((FNCALL *)a)->func);
+            break;
+
+        case N_USER_FUNCCALL:
+            printf("[%p] USER FUNCTION %s\n",a,((UFNCALL *)a)->s->name);
+            treeprint_inner(((UFNCALL *)a)->l,l+1);
+            break;
+
+        default:
+            printf("Unprintable node\n");
+
+    }
+}
+
+void treeprint(AST const * const a)
+{
+    treeprint_inner(a, 1);
 }
 
 double eval(AST *a)
@@ -135,10 +255,9 @@ double eval(AST *a)
 
         case N_WHILE:
         v = 0.0; 
-        if( ((FLOW *)a)->tl) {
-            while( eval( ((FLOW *)a)->cond) != 0)
+        if( ((FLOW *)a)->tl) 
+            while( eval( ((FLOW *)a)->cond) != 0) 
                 v = eval( ((FLOW *)a)->tl);
-        }
         break;
 
         case N_LIST: eval(a->l); v = eval(a->r); break;

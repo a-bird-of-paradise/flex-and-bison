@@ -12,6 +12,7 @@ int yylex();
 %code provides { void yyerror(const char *s, ...); }
 
 %define parse.error detailed
+%define parse.trace
 
 %union {
     AST *a;
@@ -23,36 +24,37 @@ int yylex();
 
 %destructor { treefree($$); } <a>
 %destructor { symlistfree($$); } <sl>
+%destructor { /* owned by symtab */ } <s>
 
 %token <d> NUMBER
 %token <s> NAME
 %token <fn> FUNC
 %token EOL
 
-%token IF THEN ELSE WHILE DO LET
+%token IF THEN ELSE WHILE DO LET FI DONE
 
 %nonassoc <fn> CMP
 %right '='
 %left '+' '-'
 %left '*' '/'
 %nonassoc '|' UMINUS
+%nonassoc THEN
+%nonassoc ELSE
 
-%type <a> exp stmt list explist
+%type <a> exp stmt explist list
 %type <sl> symlist
 
 %start calclist
 
 %%
 
-stmt: IF exp THEN list              {$$ = newflow(N_IF,$2,$4,NULL);     }
-    | IF exp THEN list ELSE list    {$$ = newflow(N_IF,$2,$4,$6);       }
-    | WHILE exp DO list             {$$ = newflow(N_WHILE,$2,$4,NULL);  }
-    | exp;
+stmt:   IF exp THEN list            { $$ = newflow(N_IF,$2,$4,NULL);    }
+    |   IF exp THEN list ELSE list  { $$ = newflow(N_IF,$2,$4,$6);      }
+    |   WHILE exp DO list           { $$ = newflow(N_WHILE,$2,$4,NULL); }
+    |   exp;
 
-list:   %empty                      {   $$ = NULL;  }
-    |   stmt ';' list               {
-        if($3 == NULL) {$$ = $1;} else {$$ = newast(N_LIST,$1,$3);}
-    };
+list:   %empty                      { $$ = NULL;    }
+    |   stmt ';' list               { if(!$3) $$=$1; else $$ = newast(N_LIST,$1,$3);};
 
 exp: exp CMP exp                    { $$ = newcmp($2,$1,$3);            }
     |   exp '+' exp                 { $$ = newast(N_PLUS,$1,$3);        }
@@ -68,8 +70,9 @@ exp: exp CMP exp                    { $$ = newcmp($2,$1,$3);            }
     |   FUNC '(' explist ')'        { $$ = newfunc($1,$3);              }
     |   NAME '(' explist ')'        { $$ = newcall($1,$3);              };
 
-explist:    exp
-    |   exp ',' explist {   $$ = newast(N_LIST,$1,$3);  }
+explist: 
+        exp             {   $$ = $1;                    }
+    |   exp ',' explist {   $$ = newast(N_LIST,$1,$3);  };
 
 symlist:    NAME            { $$ = newsymlist($1,NULL); }
     |   NAME ',' symlist    { $$ = newsymlist($1,$3);   };

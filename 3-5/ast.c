@@ -77,7 +77,7 @@ AST *newasgn(SYMBOL *s, AST *v)
     return (AST *)a;
 }
 
-AST *newflow(NODETYPE nodetype, AST* cond, AST *tl, AST *tr)
+AST *newflow(NODETYPE nodetype, AST* cond, AST *tl, AST *el)
 {
     FLOW *a = malloc(sizeof(FLOW));
     if(!a) { yyerror("Out of memory"); exit(0);   }
@@ -85,7 +85,7 @@ AST *newflow(NODETYPE nodetype, AST* cond, AST *tl, AST *tr)
     a->nodetype = nodetype;
     a->cond = cond;
     a->tl = tl;
-    a->el = tr;
+    a->el = el;
 
     return (AST *)a;
 }
