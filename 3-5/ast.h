@@ -34,6 +34,7 @@ typedef enum bifs {
     B_print,
     B_debug,
     B_quit,
+    B_abs,
 } BUILTINS;
 
 typedef struct ast {

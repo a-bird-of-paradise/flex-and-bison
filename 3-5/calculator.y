@@ -38,23 +38,29 @@ int yylex();
 %left '+' '-'
 %left '*' '/'
 %nonassoc '|' UMINUS
-%nonassoc THEN
-%nonassoc ELSE
 
-%type <a> exp stmt explist list
+%type <a> exp stmt explist compound_stmt stmt_list exp_stmt while_stmt if_stmt
 %type <sl> symlist
 
 %start calclist
 
 %%
 
-stmt:   IF exp THEN list            { $$ = newflow(N_IF,$2,$4,NULL);    }
-    |   IF exp THEN list ELSE list  { $$ = newflow(N_IF,$2,$4,$6);      }
-    |   WHILE exp DO list           { $$ = newflow(N_WHILE,$2,$4,NULL); }
-    |   exp;
+stmt: compound_stmt | exp_stmt | while_stmt | if_stmt;
 
-list:   %empty                      { $$ = NULL;    }
-    |   stmt ';' list               { if(!$3) $$=$1; else $$ = newast(N_LIST,$1,$3);};
+if_stmt: IF exp THEN stmt FI            { $$ = newflow(N_IF,$2,$4,NULL);    } 
+    |   IF exp THEN stmt ELSE stmt FI   { $$ = newflow(N_IF,$2,$4,$6);      };
+
+compound_stmt:  '{' '}'     { $$ = NULL;    }
+    |   '{' stmt_list '}'   { $$ = $2;      };
+
+stmt_list:  stmt        {   $$ = $1;    }
+    |   stmt stmt_list  { if(!$2) $$=$1; else $$ = newast(N_LIST,$1,$2);};
+
+exp_stmt:   ';'     { $$ = NULL; }
+    |   exp ';'     { $$ = $1;   };
+
+while_stmt: WHILE exp DO stmt DONE  { $$ = newflow(N_WHILE,$2,$4,NULL); };
 
 exp: exp CMP exp                    { $$ = newcmp($2,$1,$3);            }
     |   exp '+' exp                 { $$ = newast(N_PLUS,$1,$3);        }
@@ -82,7 +88,7 @@ calclist:   %empty
             printf("= %4.4g\n>",    eval($2));
             treefree($2);
     }
-    |   calclist LET NAME '(' symlist ')' '=' list EOL {
+    |   calclist LET NAME '(' symlist ')' '=' stmt EOL {
             dodef($3,$5,$8); 
             printf("Defined %s\n> ",$3->name);
     }

@@ -15,6 +15,7 @@ static double callbultin(FNCALL *fn)
         case B_print:   treeprint(fn->l); return v; // will be printed
         case B_debug:   if(v!=0) yydebug=1; else yydebug=0; return v;
         case B_quit:    exit(v);
+        case B_abs:     return fabs(v);
         default:    yyerror("Unknown internal function %d\n",fn->func);
                     return 0.0;
     }
@@ -191,6 +192,7 @@ void treeprint_inner(AST const * const a, const int l)
 
         case N_BUILTIN_FUNCCALL: 
             printf("[%p] BUILT IN FUNCTION %d\n",a, ((FNCALL *)a)->func);
+            treeprint_inner( ((FNCALL *)a)->l, l+1);
             break;
 
         case N_USER_FUNCCALL:
