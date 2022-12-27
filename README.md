@@ -48,7 +48,7 @@ Could also have used trailing context to ignore the newline and let the usual ne
 
 ## Chapter 3 Exercises
 
-1. I ended up introducing the concept of compount statements to the grammar. So a list of one thing is just `x=1;` while a list of many things is `{x = 1; y = 2; }`. Just like `C`. Ideally would make terminal `;` optional (i.e. a newline will inject any single `;` needed) but this is a bit delicate. 
+1. I ended up introducing the concept of compound statements to the grammar. So a list of one thing is just `x=1;` while a list of many things is `{x = 1; y = 2; }`. Just like `C`. Ideally would make terminal `;` optional (i.e. a newline will inject any single `;` needed) but this is a bit delicate. 
 
     This introduced very strange bison errors to do with the dangling else problem. I am not going to try and solve this now; I introduced sentinels like `fi` and `done` to explicitly close off certain constructs which obliterates this ambiguity. 
 
