@@ -46,5 +46,19 @@ Could also have used trailing context to ignore the newline and let the usual ne
 
     So you can either periodically double the hash table, or you can walk a chain more often and have to merge it at the end. So the growing table wins here.
 
+## Chapter 3 Exercises
 
+1. I ended up introducing the concept of compount statements to the grammar. So a list of one thing is just `x=1;` while a list of many things is `{x = 1; y = 2; }`. Just like `C`. Ideally would make terminal `;` optional (i.e. a newline will inject any single `;` needed) but this is a bit delicate. 
+
+    This introduced very strange bison errors to do with the dangling else problem. I am not going to try and solve this now; I introduced sentinels like `fi` and `done` to explicitly close off certain constructs which obliterates this ambiguity. 
+
+    I do have a memory leak somewhere. If a syntax error happens occasionally something doesn't get `free()`d. Need to track that down.
+
+    Also introudced a couple more builtins, such as a tree printer and a quit function. 
+
+    Having a thing which can do Newton-Raphson for me is pretty neat. The function is now defined as 
+
+    `let sq(n) = { e = 1; while abs( ((t=n/e)-e) ) > 0.00001 do e = avg(e,t); done }`
+
+2. The evaluation is done in this way to prevent scope pollution, I think. One of your later arguments could depend on some symbol you're about to modify in a complex way. So to avoid that we evaluate the arguments first, and only then update dummies. We also restore the dummies after for similar reasons - just in case something depended on them. 
 
