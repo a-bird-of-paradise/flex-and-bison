@@ -1,0 +1,8 @@
+sqlp
+lex.yy.c
+lex.yy.h
+sql.tab.c
+sql.tab.h
+kw.txt
+kwf.txt
+kwb.txt
