@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include "symbol.h"
 }
 
 %code provides {
@@ -297,8 +298,16 @@ stmt:   select_stmt     {   emit("STMT");   }
     |   create_table_stmt   {emit("STMT");  }
     |   set_stmt        {   emit("STMT");   };
 
-expr:   NAME                            {   emit("NAME %s", $1);    free($1);           }
-    |   NAME '.' NAME                   {   emit("FIELDNAME %s.%s", $1, $3);    free($1);   free($3);   }
+expr:   NAME                            {   emit("NAME %s", $1);    
+                                            addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_COL);    
+                                            free($1);                                   }
+    |   NAME '.' NAME                   {   emit("FIELDNAME %s.%s", $1, $3);    
+                                            char* buffer = malloc(sizeof(char) * ( strlen($1) + strlen($3) + 4));
+                                            strcpy(buffer, $1);
+                                            strcat(buffer, ".");
+                                            strcat(buffer, $3);
+                                            addref(yylineno, curfilename, buffer, SYMTAB_REFER | SYMTAB_COL);
+                                            free($1);   free($3);   free(buffer);       }   
     |   USERVAR                         {   emit("USERVAR %s", $1); free($1);           }
     |   STRING                          {   emit("STRING %s", $1); free($1);            }
     |   INTNUM                          {   emit("NUMBER %d", $1);                      }
@@ -417,8 +426,8 @@ opt_limit: %empty
 
 opt_into_list:  %empty | INTO column_list { emit("INTO %d", $2);    };
 
-column_list:    NAME        {   emit("COLUMN %s", $1); free($1);    $$=1;   }
-|   column_list ',' NAME    {   emit("COLUMN %s", $3); free($3);    $$=1+$1;};
+column_list:    NAME        {   emit("COLUMN %s", $1); addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_COL); free($1);    $$=1;   }
+|   column_list ',' NAME    {   emit("COLUMN %s", $3); addref(yylineno, curfilename, $3, SYMTAB_REFER | SYMTAB_COL); free($3);    $$=1+$1;};
 
 select_opts:    %empty {$$=0;}
 |   select_opts ALL { 
@@ -444,8 +453,21 @@ select_expr_list:   select_expr {$$ = 1;    }
 
 select_expr: expr opt_as_alias;
 
-opt_as_alias:   AS NAME {emit ("ALIAS %s", $2); free($2);   }
-|   NAME { emit("ALIAS %s", $1); free($1);  }
+opt_as_alias:   AS NAME {   emit ("ALIAS %s", $2);     
+                            addref(yylineno, curfilename, $2, SYMTAB_DEFINE | SYMTAB_COL);    
+                            free($2);   }
+|   NAME {  emit("ALIAS %s", $1);    
+            addref(yylineno, curfilename, $1, SYMTAB_DEFINE | SYMTAB_COL);    
+            free($1);  }
+|   %empty ;
+
+
+opt_as_alias_tab: AS NAME { emit ("ALIAS %s", $2);     
+                            addref(yylineno, curfilename, $2, SYMTAB_DEFINE | SYMTAB_TABLE);    
+                            free($2);   }
+|   NAME {  emit("ALIAS %s", $1);    
+            addref(yylineno, curfilename, $1, SYMTAB_DEFINE | SYMTAB_TABLE);    
+            free($1);  }
 |   %empty ;
 
 table_references:   table_reference         { $$ = 1;       }
@@ -454,10 +476,20 @@ table_references:   table_reference         { $$ = 1;       }
 table_reference: table_factor | join_table;
 
 table_factor: 
-    NAME opt_as_alias index_hint            { emit("TABLE %s", $1); free($1);                   }
-|   NAME '.' NAME opt_as_alias index_hint   { emit("TABLE %s.%s", $1, $3); free($1); free($3);  }
-|   table_subquery opt_as NAME              { emit("SUBQUERYAS %s", $3); free($3);              }
-|   '(' table_references ')'                { emit("TABLEREFERENCES %d", $2);                   };
+    NAME opt_as_alias_tab index_hint            {   emit("TABLE %s", $1);      
+                                                    addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_TABLE);    
+                                                    free($1);                   }
+|   NAME '.' NAME opt_as_alias_tab index_hint   {   emit("TABLE %s.%s", $1, $3);   
+                                                    char* buffer = malloc(sizeof(char) * ( strlen($1) + strlen($3) + 4));
+                                                    strcpy(buffer, $1);
+                                                    strcat(buffer, ".");
+                                                    strcat(buffer, $3);
+                                                    addref(yylineno, curfilename, buffer, SYMTAB_REFER | SYMTAB_TABLE);
+                                                    free($1); free($3); free(buffer);  }
+|   table_subquery opt_as NAME                  {   emit("SUBQUERYAS %s", $3);      
+                                                    addref(yylineno, curfilename, $3, SYMTAB_DEFINE | SYMTAB_TABLE);    
+                                                    free($3);              }
+|   '(' table_references ')'                    {   emit("TABLEREFERENCES %d", $2);                   };
 
 opt_as: %empty | AS;
 
@@ -527,9 +559,14 @@ delete_opts:    %empty  {   $$  =   0;  }
     |   delete_opts QUICK           {   $$ = $1 + 02;   }
     |   delete_opts IGNORE          {   $$ = $1 + 04;   };
 
-delete_list:    NAME    opt_dot_star {  emit("TABLE %s", $1); free($1); $$ = 1; }
+delete_list:    NAME    opt_dot_star {  
+        emit("TABLE %s", $1); 
+        addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_COL);
+        free($1); $$ = 1; }
     |   delete_list ',' NAME opt_dot_star {
-        emit("TABLE %s", $3); free($3); $$ = 1+$1;
+        emit("TABLE %s", $3); 
+        addref(yylineno, curfilename, $3, SYMTAB_REFER | SYMTAB_COL);
+        free($3); $$ = 1+$1;
     };
 
 opt_dot_star:   %empty |    '.' '*';
@@ -571,6 +608,7 @@ insert_asgn_list:
     NAME COMPARISON expr {
         if($2 != 4) { yyerror("Bad insert assignment to %s", $1); YYERROR; }
         emit("ASSIGN %s", $1);
+        addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_COL);
         free($1);
         $$ = 1;
     }
@@ -578,12 +616,14 @@ insert_asgn_list:
         if($2 != 4) { yyerror("Bad insert assignment to %s", $1); YYERROR; }
         emit("DEFAULT");
         emit("ASSIGN %s", $1);
+        addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_COL);
         free($1);
         $$ = 1;
     }
 |   insert_asgn_list ',' NAME COMPARISON expr {
         if($4 != 4) { yyerror("Bad insert assignment to %s", $3); YYERROR; }
         emit("ASSIGN %s", $3);
+        addref(yylineno, curfilename, $3, SYMTAB_REFER | SYMTAB_COL);
         free($3);
         $$ = 1 + $1;
     }
@@ -591,6 +631,7 @@ insert_asgn_list:
         if($4 != 4) { yyerror("Bad insert assignment to %s", $3); YYERROR; }
         emit("DEFAULT");
         emit("ASSIGN %s", $3);
+        addref(yylineno, curfilename, $3, SYMTAB_REFER | SYMTAB_COL);
         free($3);
         $$ = 1 + $1;
     };
@@ -623,33 +664,49 @@ update_asgn_list:
     NAME COMPARISON expr {
         if($2 != 4) { yyerror("Bad update assignment to %s", $1); YYERROR; }
         emit("ASSIGN %s", $1);
+        addref(yylineno, curfilename, $1, SYMTAB_REFER | SYMTAB_COL);
         free($1);
         $$ = 1;
     }
 |   NAME '.' NAME COMPARISON expr {
         if($4 != 4) { yyerror("Bad update assignment to %s", $1); YYERROR; }
         emit("ASSIGN %s.%s", $1, $3);
-        free($1); free($3);
+        char* buffer = malloc(sizeof(char) * ( strlen($1) + strlen($3) + 4));
+        strcpy(buffer, $1);
+        strcat(buffer, ".");
+        strcat(buffer, $3);
+        addref(yylineno, curfilename, buffer, SYMTAB_REFER | SYMTAB_COL);
+        free($1); free($1); free(buffer);
         $$ = 1;
     }
 |   update_asgn_list ',' NAME COMPARISON expr {
         if($4 != 4) { yyerror("Bad update assignment to %s", $3); YYERROR; }
         emit("ASSIGN %s", $3);
+        addref(yylineno, curfilename, $3, SYMTAB_REFER | SYMTAB_COL);
         free($3);
         $$ = 1 + $1;
     }
 |   update_asgn_list ',' NAME '.' NAME COMPARISON expr {
         if($6 != 4) { yyerror("Bad update assignment to %s", $3); YYERROR; }
         emit("ASSIGN %s.%s", $3, $5);
-        free($3); free($5);
+        char* buffer = malloc(sizeof(char) * ( strlen($3) + strlen($5) + 4));
+        strcpy(buffer, $3);
+        strcat(buffer, ".");
+        strcat(buffer, $5);
+        addref(yylineno, curfilename, buffer, SYMTAB_REFER | SYMTAB_COL);
+        free($3); free($5); free(buffer);
         $$ = 1 + $1;
     };
 
 create_database_stmt:
     CREATE DATABASE opt_if_not_exists NAME
-    { emit("CREATEDATABASE %d %s", $3, $4); free($4); }
+    { emit("CREATEDATABASE %d %s", $3, $4); 
+        addref(yylineno, curfilename, $4, SYMTAB_DEFINE | SYMTAB_DB);
+        free($4); }
 |   CREATE SCHEMA opt_if_not_exists NAME
-    { emit("CREATEDATABASE %d %s", $3, $4); free($4); };
+    { emit("CREATEDATABASE %d %s", $3, $4); 
+        addref(yylineno, curfilename, $4, SYMTAB_DEFINE | SYMTAB_DB);
+        free($4); };
 
 opt_if_not_exists:  %empty { $$ = 0; }
 |   IF EXISTS   {
@@ -659,22 +716,46 @@ opt_if_not_exists:  %empty { $$ = 0; }
 
 create_table_stmt:
     CREATE opt_temporary TABLE opt_if_not_exists NAME '(' create_col_list ')'
-        { emit("CREATE %d %d %d %s", $2, $4, $7, $5); free($5); }
+        { emit("CREATE %d %d %d %s", $2, $4, $7, $5);  
+        addref(yylineno, curfilename, $5, SYMTAB_DEFINE | SYMTAB_TABLE);
+        free($5); }
 |   
     CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME '(' create_col_list ')'
-        { emit("CREATE %d %d %d %s.%s", $2, $4, $9, $5, $7); free($5); free($7); }
+        { emit("CREATE %d %d %d %s.%s", $2, $4, $9, $5, $7); 
+        char* buffer = malloc(sizeof(char) * ( strlen($5) + strlen($7) + 4));
+        strcpy(buffer, $5);
+        strcat(buffer, ".");
+        strcat(buffer, $7);
+        addref(yylineno, curfilename, buffer, SYMTAB_DEFINE | SYMTAB_TABLE);
+        free($5); free($7); free(buffer);}
 |
     CREATE opt_temporary TABLE opt_if_not_exists NAME '(' create_col_list ')' create_select_stmt
-        { emit("CREATESELECT %d %d %d %s", $2, $4, $7, $5); free($5); }
+        { emit("CREATESELECT %d %d %d %s", $2, $4, $7, $5); ;  
+        addref(yylineno, curfilename, $5, SYMTAB_DEFINE | SYMTAB_TABLE);
+        free($5); }
 |
     CREATE opt_temporary TABLE opt_if_not_exists NAME create_select_stmt
-        { emit("CREATESELECT %d %d %d %s", $2, $4, 0, $5); free($5); }
+        { emit("CREATESELECT %d %d %d %s", $2, $4, 0, $5); ;  
+        addref(yylineno, curfilename, $5, SYMTAB_DEFINE | SYMTAB_TABLE);
+        free($5); }
 |
     CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME '(' create_col_list ')' create_select_stmt
-        { emit("CREATESELECT %d %d %d %s.%s", $2, $4, $9, $5, $7); free($5); free($7); }
+        { emit("CREATESELECT %d %d %d %s.%s", $2, $4, $9, $5, $7); 
+        char* buffer = malloc(sizeof(char) * ( strlen($5) + strlen($7) + 4));
+        strcpy(buffer, $5);
+        strcat(buffer, ".");
+        strcat(buffer, $7);
+        addref(yylineno, curfilename, buffer, SYMTAB_DEFINE | SYMTAB_TABLE);
+        free($5); free($7); free(buffer);}
 |
     CREATE opt_temporary TABLE opt_if_not_exists NAME '.' NAME create_select_stmt
-        { emit("CREATESELECT %d %d %d %s.%s", $2, $4, 0, $5, $7); free($5); free($7); };
+        { emit("CREATESELECT %d %d %d %s.%s", $2, $4, 0, $5, $7); 
+        char* buffer = malloc(sizeof(char) * ( strlen($5) + strlen($7) + 4));
+        strcpy(buffer, $5);
+        strcat(buffer, ".");
+        strcat(buffer, $7);
+        addref(yylineno, curfilename, buffer, SYMTAB_DEFINE | SYMTAB_TABLE);
+        free($5); free($7); free(buffer);};
 
 opt_temporary: %empty { $$ = 0; } | TEMPORARY { $$ = 1; };
 
@@ -687,7 +768,9 @@ create_definition:
 |   INDEX '(' column_list ')'               {   emit("KEY %d", $3);         }
 |   FULLTEXT KEY '(' column_list ')'        {   emit("TEXTINDEX %d", $4);   }
 |   FULLTEXT INDEX '(' column_list ')'      {   emit("TEXTINDEX %d", $4);   }
-|   {   emit("STARTCOL");   } NAME data_type column_atts { emit("COLUMNDEF %d %s", $3, $2); free($2);};
+|   {   emit("STARTCOL");   } NAME data_type column_atts { emit("COLUMNDEF %d %s", $3, $2); 
+        addref(yylineno, curfilename, $2, SYMTAB_DEFINE | SYMTAB_COL); 
+        free($2);};
 
 column_atts:    %empty { $$ = 0; }
 |   column_atts NOT NULLX      {    emit("ATTR NOTNULL"), $$ = $1 + 1;                  }

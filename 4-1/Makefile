@@ -12,7 +12,7 @@ LIBS=
 CC=/usr/local/opt/llvm/bin/clang
 CXX=/usr/local/opt/llvm/bin/clang++
 
-SOURCES=lex.yy.c sql.tab.c main.c
+SOURCES=lex.yy.c sql.tab.c main.c symbol.c
 OBJS:=$(addprefix build/, $(SOURCES:.c=.o))
 DEPS:=$(OBJS:.o=.d)
 

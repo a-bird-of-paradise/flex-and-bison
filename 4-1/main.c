@@ -1,6 +1,9 @@
 #include "sql.tab.h"
 #include "lex.yy.h" 
 
+struct symbol_table symtab;
+char* curfilename;
+
 int main(int argc, char **argv)
 {
     if(argc > 1 && !strcmp(argv[1], "-d")) {
@@ -13,6 +16,13 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    return yyparse();
+    init_table(&symtab, 9997);
+    curfilename = argv[1];
+
+    yyparse();
+
+    printrefs();
+
+    return 0;
 
 }
