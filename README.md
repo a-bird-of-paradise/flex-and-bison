@@ -80,6 +80,6 @@ Could also have used trailing context to ignore the newline and let the usual ne
 
 There aren't any; this chapter is just details of what Flex does. 
 
-## Chapter 5 Exercises
+## Chapter 6 Exercises
 
 There aren't any; this chapter is just details of what Bison does. 
