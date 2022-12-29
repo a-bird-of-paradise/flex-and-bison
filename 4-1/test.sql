@@ -8,6 +8,22 @@ create table my_db.my_table (
     Thing INT NOT NULL,
     Price DECIMAL(18,2)
 );
+create table my_db.my_other_table (
+    ID BIGINT NOT NULL PRIMARY KEY,
+    NAME varchar(255),
+    Address1 varchar(255),
+    Address2 varchar(255),
+    Thing INT NOT NULL,
+    Price DECIMAL(18,2)
+);
+
+select *
+from    my_db.my_table A
+        inner JOIN
+        my_db.my_other_table    B
+        ON  A.ID = B.ID
+where   B.Price > 30.0
+order   by A.NAME DESC;
 
 select * from my_db.my_table where Thing = 3 order by Price desc;
 

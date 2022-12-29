@@ -1,5 +1,5 @@
 # flex-and-bison
-Working through Levine's book
+Working through Levine's book. There are a few typos which I noted in the individual folders.
 
 ## Chapter 1 exercises
 
@@ -62,3 +62,24 @@ Could also have used trailing context to ignore the newline and let the usual ne
 
 2. The evaluation is done in this way to prevent scope pollution, I think. One of your later arguments could depend on some symbol you're about to modify in a complex way. So to avoid that we evaluate the arguments first, and only then update dummies. We also restore the dummies after for similar reasons - just in case something depended on them. 
 
+## Chapter 4 Exercises
+
+1. This is the kind of thing where the answer is It Depends. If you can easily restructure the grammar so that you can distinguish a bare column reference from other expressions then do that. In this case we have `NAME` or `NAME.NAME` already as columns so we can put those in. But you still have to be careful about whether it is a table or database or index `NAME` instead of a column one. 
+
+    The most pragmatic one is to put in as narrow a thing as you easily can in the grammar, and then in the actions do symbol table lookups to make sure the thing exists and is of the right type. This is where syntax analysis (what Bison excels at) becomes semantic analysis (which you have to do). 
+
+2. I borrowed the symbol table and referencer from a previous exercise and put it in. In the grammar, whenever we use a `NAME` we add a reference to it noting whether it is defining or refering to the symbol and what the symbol is in context. 
+
+    I got lazy and didn't fully finish this. For example there is a hierarchy of names that should be tracked (DB -> Schema -> Table -> Column) but I didn't bother splitting these. And I don't print out whehter this reference is a table, column etc. And it's just jammed on to the RPN thing so we do things at once: calculate an RPN representation of the SQL and print out a cross reference. 
+
+    But the astonishing thing is that it works!
+
+3.  This was marked as a term project, and I don't have a term in which to do a project, so I didn't do it. 
+
+## Chapter 5 Exercises
+
+There aren't any; this chapter is just details of what Flex does. 
+
+## Chapter 5 Exercises
+
+There aren't any; this chapter is just details of what Bison does. 
