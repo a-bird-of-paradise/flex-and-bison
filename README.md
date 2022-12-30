@@ -83,3 +83,38 @@ There aren't any; this chapter is just details of what Flex does.
 ## Chapter 6 Exercises
 
 There aren't any; this chapter is just details of what Bison does. 
+
+## Chapter 7 exercises
+
+1. Ambiguous grammars are bad because they are ambiguous. What is it you actually mean? 
+
+    I've often thought this about English. "Bob went to visit Clive and they took his dog for a walk". Whose dog? This is quite a tortured example, but people say stuff like this all the time and it is your problem if you don't parse it correctly! 
+
+    Another problem is that the fancy algo bison implements won't work if your grammar isn't sufficiently unambiguous. It relies on the fact that the next token tells it whehter it is closing the current rule or extending it. 
+
+2. There is the Willink C++ grammar and a couple of C grammars that I ran through Bison. They all went through OK!
+
+    However on closer inspection this is because the grammars are full of `%left`/`%right`/`%nonassoc` etc to resolve ambiguous parses or feature really quite involved structures to prevent dangling else and friends from occurring. 
+
+3.  So why are ambiguous grammars tolerated? 
+
+    An ambiguous grammar is one that is not context free. And all human language isn't really context free - there are huge amounts of cultural and situational context to take into account. So to a certain extent it is only natural that computer programming languages have some manageable ambiguity in them. And in bison this additional context is provided via `%left`/`%right`/`%nonassoc`. 
+
+    In the case of expressions, constructs like `a = x + y + z` are considered unambigious (even though they aren't) due to the associativity rules. You tell Bison that `%left '+'` is a thing and it will automatically reduce `x + y` first before doing the `+ z` later. Similar deal with dangling else, you tell it to prefer to shift `else` rather than reducing `if x then y` and it does the natural thing of matching `else`s to the nearest `if`. In fact Bison preferentially shifts anyway but the warnings are irritating. 
+
+## Chapter 8 Exercises
+
+1. This was already done in the book, and I added the `%destructor { free($$); } <type>` bit already as the sanitisers with clang were moaning about memory leaks. I had to add `yyclearin;` as the lookahead token was leaking. 
+
+    It's a very simple error recovery process, really. If the user enters an incorrect command you basically ignore everything until the `\n` at which point you accept another. 
+
+2. Again I don't do term projects as I don't have a term to do a term project in. However it did prompt me to look at the generated parser for 3-5 to see what undocumented features this is talking about. I think this is now just the `%define parse.error detailed` option which says "I was expecting a `;` and got an `EOL` so I am dying". 
+
+    * RMS himself wrote parts of this. I feel like I'm profaning things even by looking. 
+    * there is a hack in there to deal with a HPUX bug "probably can be removed in 2023"
+    * some memory size allocation magic number "reasonable c. 2006"
+    * a whole lot of tables that facilitate the actual parsing - would not like to generate these by hand
+    * there is an off by one error in the `yydestruct()` line numbering, probably not the biggest deal in the world
+    * the action code gets some string substitutions done and then it is copied verbatim into the parser
+
+    Would be nice to be able to inject tokens but I can't figure out how to do that. 
