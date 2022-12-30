@@ -90,7 +90,7 @@ There aren't any; this chapter is just details of what Bison does.
 
     I've often thought this about English. "Bob went to visit Clive and they took his dog for a walk". Whose dog? This is quite a tortured example, but people say stuff like this all the time and it is your problem if you don't parse it correctly! 
 
-    Another problem is that the fancy algo bison implements won't work if your grammar isn't sufficiently unambiguous. It relies on the fact that the next token tells it whehter it is closing the current rule or extending it. 
+    Another problem is that the fancy algo bison implements won't work if your grammar isn't sufficiently unambiguous. It relies on the fact that the next token tells it whether it is closing the current rule or extending it. 
 
 2. There is the Willink C++ grammar and a couple of C grammars that I ran through Bison. They all went through OK!
 
