@@ -1,0 +1,5 @@
+purecalc
+lex.yy.c
+lex.yy.h
+purecalc.tab.c
+purecalc.tab.h
