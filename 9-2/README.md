@@ -99,6 +99,7 @@ This includes `reentrant`, `bison-bridge` (i.e., expect to be called from Bison 
 
 When you want to use the extra type in a Flex action, you have to cast the `yyextra` thing to `your type` and then use it. For example, 
 ````flex
+%%
 [a-zA-Z][a-zA-Z0-9]*    {   yylval->s = lookup((PCDATA *)yyextra, yytext);  return NAME;   }
 ````
 Fine. But how to get Bison to call it like this? Well. You tell Bison to create `yylex()` calls with an extra parameter:
