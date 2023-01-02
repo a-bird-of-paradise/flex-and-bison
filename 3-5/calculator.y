@@ -57,8 +57,8 @@ compound_stmt:  '{' '}'     { $$ = NULL;    }
 stmt_list:  stmt        {   $$ = $1;    }
     |   stmt stmt_list  { if(!$2) $$=$1; else $$ = newast(N_LIST,$1,$2);};
 
-exp_stmt:   ';'     { $$ = NULL; }
-    |   exp ';'     { $$ = $1;   };
+exp_stmt:   ';'                     { $$ = NULL;                        }
+    |   exp ';'                     { $$ = $1;                          };
 
 while_stmt: WHILE exp DO stmt DONE  { $$ = newflow(N_WHILE,$2,$4,NULL); };
 
@@ -77,11 +77,11 @@ exp: exp CMP exp                    { $$ = newcmp($2,$1,$3);            }
     |   NAME '(' explist ')'        { $$ = newcall($1,$3);              };
 
 explist: 
-        exp             {   $$ = $1;                    }
-    |   exp ',' explist {   $$ = newast(N_LIST,$1,$3);  };
+        exp                         {   $$ = $1;                        }
+    |   exp ',' explist             {   $$ = newast(N_LIST,$1,$3);      };
 
-symlist:    NAME            { $$ = newsymlist($1,NULL); }
-    |   NAME ',' symlist    { $$ = newsymlist($1,$3);   };
+symlist:    NAME                    { $$ = newsymlist($1,NULL);         }
+    |   NAME ',' symlist            { $$ = newsymlist($1,$3);   }       ;
 
 calclist:   %empty
     |   calclist stmt EOL   {
@@ -93,7 +93,7 @@ calclist:   %empty
             printf("Defined %s\n> ",$3->name);
     }
     |   calclist error EOL  {
-            yyerrok; printf("> ");
+            yyclearin; yyerrok; printf("> ");
     };
 
 %%

@@ -52,7 +52,7 @@ Could also have used trailing context to ignore the newline and let the usual ne
 
     This introduced very strange bison errors to do with the dangling else problem. I am not going to try and solve this now; I introduced sentinels like `fi` and `done` to explicitly close off certain constructs which obliterates this ambiguity. 
 
-    I do have a memory leak somewhere. If a syntax error happens occasionally something doesn't get `free()`d. Need to track that down.
+    I do have a memory leak somewhere. If a syntax error happens occasionally something doesn't get `free()`d. Need to track that down. (I ultimately traced this to calls to `free()` where `treefree()` was meant, e.g., assignments: the rvalue could be a structured expression so a full `treefree()` is needed.)
 
     Also introudced a couple more builtins, such as a tree printer and a quit function. 
 

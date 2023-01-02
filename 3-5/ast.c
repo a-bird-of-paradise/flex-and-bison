@@ -117,12 +117,12 @@ void treefree(AST *a)
             break;
 
         case '=':
-            free( ((SYMASGN *)a)->v);
+            treefree( ((SYMASGN *)a)->v);
             break;
 
         case 'I':
         case 'W':
-            free( ((FLOW *)a)->cond);
+            treefree( ((FLOW *)a)->cond);
             if(((FLOW *)a)->tl) treefree(((FLOW *)a)->tl);
             if(((FLOW *)a)->el) treefree(((FLOW *)a)->el);
             break;
