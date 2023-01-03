@@ -60,3 +60,10 @@ LEFT JOIN (
 ) sub ON c.calendar_date = sub.order_day
 GROUP BY c.calendar_date, c.calendar_year, c.calendar_month, c.calendar_dayname
 ORDER BY c.calendar_date ASC;
+
+INSERT INTO t1 (a,b,c) VALUES (1,2,3)
+  ON DUPLICATE KEY UPDATE c=c+1;
+
+INSERT INTO t1 (a,b,c) VALUES (1,2,3)
+  ON /* comment */ DUPLICATE KEY UPDATE c=c+1;
+
