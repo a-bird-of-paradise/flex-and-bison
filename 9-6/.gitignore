@@ -1,0 +1,6 @@
+cppcalc
+cppcalc-parser.tab.cc
+cppcalc-parser.tab.hh
+lex.yy.cc
+lex.yy.hh
+location.hh
