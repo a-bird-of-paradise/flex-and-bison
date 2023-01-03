@@ -125,6 +125,10 @@ There aren't any; this chapter is just details of what Bison does.
 
     What you probably actually want is to have a flag in your context object that lets the lexer communicate to the main program that execution is complete. I might put that in. 
 
+    I did in the end. Very straightforward. Add a bool to the context and initialise it to `false`. In the lexer, when matching `<<EOF>>` you set the bool to `true` and `return 0;` just like a newline. However the main loop examines the context after every iteration and, if it is set `true`, terminates the loop. 
+
+    And I had to destroy the scanner and the other `malloc()`/`calloc()`ed elements of the context, because the sanitisers catch these leaks now (which didn't matter when the lexer `exit()`ed).
+
 2. We can break the LALR parser relatively easily with the `ON DUPLICATE` statement. As the scanner returns one token for `ON[ \t\n]+DUPLICATE` statements like
     ````sql
     INSERT INTO t1 (a,b,c) 
