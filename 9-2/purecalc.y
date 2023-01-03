@@ -35,7 +35,6 @@
 %token <d> NUMBER
 %token <s> NAME
 %token <fn> FUNC
-%token EOL
 
 %token IF THEN ELSE WHILE DO LET
 
@@ -92,17 +91,14 @@ explist:
 symlist:    NAME                    { $$ = newsymlist(pp, $1,NULL);         }
     |   NAME ',' symlist            { $$ = newsymlist(pp, $1,$3);           };
 
-calc:   %empty          {   pp->ast = NULL; YYACCEPT;   }
-    |   stmt EOL   { pp->ast = $1; YYACCEPT; }
-    |   LET NAME '(' symlist ')' '=' stmt EOL {
+calc:   %empty                                  {   pp->ast = NULL; }
+    |   stmt                                    {   pp->ast = $1;   }
+    |   LET NAME '(' symlist ')' '=' stmt       {
             dodef(pp, $2,$4,$7); 
             printf("%d: Defined %s\n", yyget_lineno(pp->scaninfo), $2->name);
             pp->ast = NULL;
-            YYACCEPT;
     }
-    |   error EOL  {
-            yyclearin; yyerrok; YYACCEPT;
-    };
+    |   error                                   {   yyclearin; yyerrok; };
 
 %%
 

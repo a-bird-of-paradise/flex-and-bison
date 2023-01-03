@@ -55,8 +55,8 @@ abs     {   yylval->fn = B_abs;  return FUNC;   }
 [ \t]+
 
 \\\n    {   printf("c> ");  }
-\n      {   return EOL;     }
+\n      {   return 0;   }
 
 .   {   yyerror(yyextra, "Unrecognised character %c", *yytext);  }
 
-<<EOF>> {   exit(0);    }
+<<EOF>> {   exit(0);   }

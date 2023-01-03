@@ -121,6 +121,10 @@ There aren't any; this chapter is just details of what Bison does.
 
 ## Chapter 9 Exercises 
 
+1. Relatively straightforward. Adapt the lexer to return 0 on a new line and then you can remove the `EOL` tokens from the grammar. You still need an end-of-file to terminate the program. 
+
+    What you probably actually want is to have a flag in your context object that lets the lexer communicate to the main program that execution is complete. I might put that in. 
+
 2. We can break the LALR parser relatively easily with the `ON DUPLICATE` statement. As the scanner returns one token for `ON[ \t\n]+DUPLICATE` statements like
     ````sql
     INSERT INTO t1 (a,b,c) 
