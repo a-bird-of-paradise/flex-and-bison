@@ -287,7 +287,10 @@ void emit(char *s, ...);
 
 %%
 
-stmt_list: stmt ';' | stmt_list stmt ';';
+stmt_list: stmt ';' 
+    | stmt_list stmt ';' 
+    | error ';'             { yyclearin; yyerrok; }
+    | stmt_list error ';'   { yyclearin; yyerrok; };
 
 stmt:   select_stmt     {   emit("STMT");   }
     |   delete_stmt     {   emit("STMT");   }
@@ -676,7 +679,7 @@ update_asgn_list:
         strcat(buffer, ".");
         strcat(buffer, $3);
         addref(yylineno, curfilename, buffer, SYMTAB_REFER | SYMTAB_COL);
-        free($1); free($1); free(buffer);
+        free($1); free($3); free(buffer);
         $$ = 1;
     }
 |   update_asgn_list ',' NAME COMPARISON expr {

@@ -1,5 +1,9 @@
 create database my_db;
 
+create /* commented */ database other_db;
+
+create database error_db 3; -- errors
+
 create table my_db.my_table (
     ID BIGINT NOT NULL PRIMARY KEY,
     NAME varchar(255),
@@ -26,6 +30,12 @@ where   B.Price > 30.0
 order   by A.NAME DESC;
 
 select * from my_db.my_table where Thing = 3 order by Price desc;
+
+update my_db.my_table A inner join filter_table B on A.x = b.x set A.y = 3;
+
+select not exists (select a from b);
+select not -- hi
+exists (select a from b);
 
 SELECT
 c.calendar_date,
