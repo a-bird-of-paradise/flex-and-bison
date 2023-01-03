@@ -121,7 +121,7 @@ There aren't any; this chapter is just details of what Bison does.
 
 ## Chapter 9 Exercises 
 
-1. We can break the LALR parser relatively easily with the `ON DUPLICATE` statement. As the scanner returns one token for `ON[ \t\n]+DUPLICATE` statements like
+2. We can break the LALR parser relatively easily with the `ON DUPLICATE` statement. As the scanner returns one token for `ON[ \t\n]+DUPLICATE` statements like
     ````sql
     INSERT INTO t1 (a,b,c) 
     VALUES (1,2,3)
@@ -139,4 +139,3 @@ There aren't any; this chapter is just details of what Bison does.
     INSERT INTO t1 (a,b,c) VALUES (1,2,3)
     ON /* comment */ DUPLICATE KEY UPDATE c=c+1;
     ````
-    
