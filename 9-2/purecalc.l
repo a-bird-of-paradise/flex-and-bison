@@ -46,7 +46,7 @@ debug   {   yylval->fn = B_debug;return FUNC;   }
 quit    {   yylval->fn = B_quit; return FUNC;   }
 abs     {   yylval->fn = B_abs;  return FUNC;   }
 
-[a-zA-Z][a-zA-Z0-9]*    {   yylval->s = lookup((PCDATA *)yyextra, yytext);  return NAME;   }
+[a-zA-Z][a-zA-Z0-9]*    {   yylval->s = lookup(yyextra, yytext);  return NAME;   }
 
 [0-9]+"."[0-9]*{EXP}?   |
 "."?[0-9]+{EXP}?        {   yylval->d = atof(yytext);    return NUMBER; }
@@ -59,4 +59,4 @@ abs     {   yylval->fn = B_abs;  return FUNC;   }
 
 .   {   yyerror(yyextra, "Unrecognised character %c", *yytext);  }
 
-<<EOF>> {   exit(0);   }
+<<EOF>> {   yyextra->done = true; return 0;  }

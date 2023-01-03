@@ -20,3 +20,4 @@ typedef struct symlist {
 
 SYMLIST *newsymlist(PCDATA *pcdata, SYMBOL *sym, SYMLIST *next);
 void symlistfree(PCDATA *pcdata, SYMLIST *sl);
+void symtabfree(PCDATA *pcdata);

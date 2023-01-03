@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv)
 {
-    PCDATA p = { NULL, NULL, NULL };
+    PCDATA p = { NULL, NULL, NULL, false };
 
     if(yylex_init_extra(&p, &p.scaninfo)){
         perror("Initial allocation failed");
@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    for(;;) {
+    while(!p.done) {
         printf("> ");
         yyparse(&p);
         if(p.ast){
@@ -24,6 +24,9 @@ int main(int argc, char **argv)
             p.ast = NULL;
         }
     }
+
+    yylex_destroy(p.scaninfo);
+    symtabfree(&p);
 
     return 0;
 

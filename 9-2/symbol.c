@@ -40,3 +40,35 @@ SYMBOL* lookup(PCDATA *pcdata, char* sym)
     yyerror(pcdata, "Symbol table overflow\n");
     abort();
 }
+
+SYMLIST *newsymlist(PCDATA *pcdata, SYMBOL *sym, SYMLIST *next)
+{
+    SYMLIST *sl = malloc(sizeof(SYMLIST));
+    if(!sl) { yyerror(pcdata, "Out of memory"); exit(0);   }
+
+    sl->sym=sym;
+    sl->next=next;
+    return sl;
+}
+
+void symlistfree(PCDATA *pcdata, SYMLIST *sl)
+{
+    SYMLIST *nsl;
+
+    while(sl) {
+        nsl = sl->next;
+        free(sl);
+        sl = nsl;
+    }
+}
+void symtabfree(PCDATA *pcdata)
+{
+    for(int i = 0; i < N_HASH; i++){
+       if(pcdata->symtab[i].name){
+            symlistfree(pcdata,pcdata->symtab[i].syms);
+            treefree(pcdata,pcdata->symtab[i].func);
+            free(pcdata->symtab[i].name);
+       }
+    }
+    free(pcdata->symtab);
+}

@@ -139,24 +139,3 @@ void treefree(PCDATA *pcdata, AST *a)
     }
     free(a);
 }
-
-SYMLIST *newsymlist(PCDATA *pcdata, SYMBOL *sym, SYMLIST *next)
-{
-    SYMLIST *sl = malloc(sizeof(SYMLIST));
-    if(!sl) { yyerror(pcdata, "Out of memory"); exit(0);   }
-
-    sl->sym=sym;
-    sl->next=next;
-    return sl;
-}
-
-void symlistfree(PCDATA *pcdata, SYMLIST *sl)
-{
-    SYMLIST *nsl;
-
-    while(sl) {
-        nsl = sl->next;
-        free(sl);
-        sl = nsl;
-    }
-}
