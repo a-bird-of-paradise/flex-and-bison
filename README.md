@@ -118,3 +118,25 @@ There aren't any; this chapter is just details of what Bison does.
     * the action code gets some string substitutions done and then it is copied verbatim into the parser
 
     Would be nice to be able to inject tokens but I can't figure out how to do that. 
+
+## Chapter 9 Exercises 
+
+1. We can break the LALR parser relatively easily with the `ON DUPLICATE` statement. As the scanner returns one token for `ON[ \t\n]+DUPLICATE` statements like
+    ````sql
+    INSERT INTO t1 (a,b,c) 
+    VALUES (1,2,3)
+    ON /* comment */ DUPLICATE KEY UPDATE c=c+1;
+    ````
+    cause an `ON` token to be returned, not the special `ON DUPLICATE` one, giving syntax errors like:
+    ````
+    error: syntax error, unexpected ON, expecting ONDUPLICATE or ';' or ','
+    ````
+    However the GLR parser just sees an `ON` token, then a `DUPLICATE` token, and the couple of branches it has after the `ON` are reduced to one when it sees `DUPLICATE`. So the following two statements are parsed correctly:
+    ````sql
+    INSERT INTO t1 (a,b,c) VALUES (1,2,3)
+    ON DUPLICATE KEY UPDATE c=c+1;
+
+    INSERT INTO t1 (a,b,c) VALUES (1,2,3)
+    ON /* comment */ DUPLICATE KEY UPDATE c=c+1;
+    ````
+    
