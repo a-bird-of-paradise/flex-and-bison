@@ -129,6 +129,8 @@ There aren't any; this chapter is just details of what Bison does.
 
     And I had to destroy the scanner and the other `malloc()`/`calloc()`ed elements of the context, because the sanitisers catch these leaks now (which didn't matter when the lexer `exit()`ed).
 
+    As a coda to this exercise, I also reimplemented it in `C++` using the latest Flex and bison features. [Read all about it](misc/cppcalc/README.md). There is a steeper learning curve but, once you get it, the ability to use objects means you can be more expressive and also take advantaage of object destructors to save many memory issues in `C`.
+
 2. We can break the LALR parser relatively easily with the `ON DUPLICATE` statement. As the scanner returns one token for `ON[ \t\n]+DUPLICATE` statements like
     ````sql
     INSERT INTO t1 (a,b,c) 
@@ -139,7 +141,7 @@ There aren't any; this chapter is just details of what Bison does.
     ````
     error: syntax error, unexpected ON, expecting ONDUPLICATE or ';' or ','
     ````
-    However the GLR parser just sees an `ON` token, then a `DUPLICATE` token, and the couple of branches it has after the `ON` are reduced to one when it sees `DUPLICATE`. So the following two statements are parsed correctly:
+    However the GLR parser just sees an `ON` token, then a `DUPLICATE` token, and the couple of branches it has after the `ON` are reduced to one when it sees `DUPLICATE`. So the following two statements are parsed correctly and equivalently:
     ````sql
     INSERT INTO t1 (a,b,c) VALUES (1,2,3)
     ON DUPLICATE KEY UPDATE c=c+1;
@@ -147,3 +149,8 @@ There aren't any; this chapter is just details of what Bison does.
     INSERT INTO t1 (a,b,c) VALUES (1,2,3)
     ON /* comment */ DUPLICATE KEY UPDATE c=c+1;
     ````
+## Conclusion
+
+Well. I worked through the book and adapted the calculator to be a C++ thing as a final exercise. The book has a few slips in the example code (nothing too bad but see the comments in individual folders for bugs I found) which is a bit annoying but nothing too bad to sort. 
+
+It could have used an example of e.g. parsing an `.ini` file or similar instead of jumping straight in with an expression language that can do Newton-Raphson. But I do feel I know these tools now. Just need a use...

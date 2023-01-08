@@ -1,0 +1,6 @@
+lex.yy.*
+cppcalc.tab.*
+cppcalc
+Parser.?pp
+Scanner.cpp
+location.hh

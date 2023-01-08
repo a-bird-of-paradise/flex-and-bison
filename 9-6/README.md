@@ -13,4 +13,4 @@ Getting the C++ simple calculator built was very close to the book. Couple of mi
 
 From reading the Flex and Bison manuals, it is apparent that the C++ interfaces have moved on significantly since the book was published. 
 
-As the final thing with this book, I am going to take the advanced calculator (from example 9-2) and rewrite it using the latest C++ functionality. Broadly speaking, this is making Flex return "complete symbols" i.e. an object with the symbol type, the symbol value, and the symbol's location; and using a Flex scanner class which now, apparently, works, kinda.
+As the final thing with this book, I am going to take the advanced calculator (from example 9-2) and rewrite it using the latest C++ functionality. Broadly speaking, this is making Flex return "complete symbols" i.e. an object with the symbol type, the symbol value, and the symbol's location; and using a Flex scanner class which now, apparently, works, kinda. I did eventually implement this, [read all about it](../misc/cppcalc/README.md). 
