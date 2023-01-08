@@ -220,23 +220,12 @@ class Builtin_Node : virtual public AST_Node
 {
 public:
     Builtin_Node() = delete;
-    Builtin_Node(Builtin_Function func, std::unique_ptr<AST_Node>&& v) : m_func(func), m_v(std::move(v)) {}
-    virtual double eval() override {
-        double answer = m_v->eval();
-        switch(m_func){
-            case Builtin_Function::B_ABS: answer = fabs(answer); break;
-            case Builtin_Function::B_DEBUG: answer = 0; break;
-            case Builtin_Function::B_EXP: answer = exp(answer); break;
-            case Builtin_Function::B_LOG: answer = log(answer); break;
-            case Builtin_Function::B_PRINT: break;
-            case Builtin_Function::B_QUIT: exit(1); break;
-            case Builtin_Function::B_SQRT: answer = sqrt(answer); break;
-        }
-        return answer;
-    }
+    Builtin_Node(Builtin_Function func, std::unique_ptr<AST_Node>&& v, cppcalc::Context *ctx);
+    virtual double eval() override;
 protected:
     Builtin_Function m_func;
     std::unique_ptr<AST_Node> m_v;
+    cppcalc::Context *m_ctx;
 };
 
 class User_Node : virtual public AST_Node

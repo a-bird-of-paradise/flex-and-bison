@@ -27,7 +27,7 @@ namespace AST {
             // m_v is either a list of expressions, or a singleton expression, or empty (i.e. insufficient args)
             if(current == nullptr) 
                 throw cppcalc::Parser::syntax_error(m_ctx->loc,"Insufficient arguments");
-            bool is_list = dynamic_cast<List_Node*>(current);
+            bool is_list = dynamic_cast<List_Node*>(current) != nullptr ? true : false;
             if(is_list) {
                 current = dynamic_cast<List_Node*>(current)->m_right.get();
             } else {
@@ -80,5 +80,22 @@ namespace AST {
     // done
 
     return answer;
+    }
+
+    Builtin_Node::Builtin_Node(Builtin_Function func, std::unique_ptr<AST_Node>&& v, cppcalc::Context *ctx) 
+        : 
+        m_func(func), m_v(std::move(v)), m_ctx(ctx) {}
+    double Builtin_Node::eval() {
+        double answer = m_v->eval();
+        switch(m_func){
+            case Builtin_Function::B_ABS: answer = fabs(answer); break;
+            case Builtin_Function::B_DEBUG: answer = 0; break;
+            case Builtin_Function::B_EXP: answer = exp(answer); break;
+            case Builtin_Function::B_LOG: answer = log(answer); break;
+            case Builtin_Function::B_PRINT: break;
+            case Builtin_Function::B_QUIT: m_ctx->done = true; break;
+            case Builtin_Function::B_SQRT: answer = sqrt(answer); break;
+        }
+        return answer;
     }
 }

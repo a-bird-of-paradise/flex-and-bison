@@ -63,7 +63,7 @@ compound_stmt:  LBRACE RBRACE       { $$ = nullptr; }
     ;
 
 stmt_list:  stmt                    { $$ = $1;                          }
-    |   stmt stmt_list              { $$ = AST::single_or_list($1,$2);  } 
+    |       stmt stmt_list          { $$ = AST::single_or_list($1,$2);  } 
     ;
 
 exp_stmt:   SEMICOLON               { $$ = nullptr; }
@@ -73,7 +73,7 @@ exp_stmt:   SEMICOLON               { $$ = nullptr; }
 while_stmt: WHILE exp DO stmt       { $$ = std::make_unique<AST::While_Node>($2,$4,nullptr);    }
     ;
 
-exp: exp CMP exp                    { $$ = std::make_unique<AST::CMP_Node>($2,$1,$3);   }
+exp:    exp CMP exp                 { $$ = std::make_unique<AST::CMP_Node>($2,$1,$3);   }
     |   exp ADD exp                 { $$ = std::make_unique<AST::Add_Node>($1,$3);      }
     |   exp SUB exp                 { $$ = std::make_unique<AST::Sub_Node>($1,$3);      }
     |   exp MUL exp                 { $$ = std::make_unique<AST::Mul_Node>($1,$3);      }
@@ -84,13 +84,12 @@ exp: exp CMP exp                    { $$ = std::make_unique<AST::CMP_Node>($2,$1
     |   NUMBER                      { $$ = std::make_unique<AST::Number_Node>($1);      }
     |   NAME                        { $$ = std::make_unique<AST::Ref_Node>($1);         }
     |   NAME EQU exp                { $$ = std::make_unique<AST::Assign_Node>($1,$3);   }
-    |   FUNC LPAREN explist RPAREN  { $$ = std::make_unique<AST::Builtin_Node>($1,$3);  }
-    |   NAME LPAREN explist RPAREN  { $$ = std::make_unique<AST::User_Node>($1,$3,ctx); }
+    |   FUNC LPAREN explist RPAREN  { $$ = std::make_unique<AST::Builtin_Node>($1,$3,ctx);}
+    |   NAME LPAREN explist RPAREN  { $$ = std::make_unique<AST::User_Node>($1,$3,ctx);   }
     ;
 
-explist: 
-        exp                 {   $$ = $1;                                        }
-    |   exp COMMA explist   {   $$ = std::make_unique<AST::List_Node>($1,$3);   }
+explist:    exp                 {   $$ = $1;                                        }
+    |       exp COMMA explist   {   $$ = std::make_unique<AST::List_Node>($1,$3);   }
     ;
 
 symlist:    NAME                { $$.push_back($1);             }
@@ -102,12 +101,13 @@ calc:   %empty  {   ctx->node = nullptr;    }
     |   LET NAME LPAREN symlist RPAREN EQU stmt {
             define_userfunc(ctx,$2,$4,$7); 
             ctx->node = nullptr;  }
-    |   error   {   yyclearin; 
-                    yyerrok; 
-                    ctx->node = nullptr; }
     |   error SEMICOLON  {  yyclearin; 
                             yyerrok; 
                             ctx->node = nullptr; }
+    |   error YYEOF      {  yyclearin; 
+                            yyerrok; 
+                            ctx->node = nullptr; 
+                            YYACCEPT; }
     ;
 
 %%

@@ -1,8 +1,11 @@
 let avg(a,b) = (a+b)/2;
-let sq(n) = { e=1; while abs( ((t=n/e) - e) ) > 0.00001 do e = avg(e,t); }
+let sq(n) = { e=1; while abs( ((t=n/e) - e) ) > 0.00000001 do e = avg(e,t); }
 let sq(n) = { e=1; while abs( ((t=n/e) - e) ) > 0.00001 do e = avg(e,t); done }
-
 sq(10);
 sqrt(10);
 sq(10)-sqrt(10);
+x = 2;
+y =6;
+z = x*y + sq(100);
+avg(z,y);
 quit(1);
